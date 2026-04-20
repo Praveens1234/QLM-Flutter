@@ -6,27 +6,8 @@ pluginManagement {
             localPropertiesFile.withInputStream { properties.load(it) }
         }
         def flutterSdkPath = properties.getProperty("flutter.sdk")
-        if (flutterSdkPath != null) {
-            return flutterSdkPath
-        }
-        // Fallback: use FLUTTER_ROOT env var (set by subosito/flutter-action on CI)
-        def flutterRoot = System.getenv("FLUTTER_ROOT")
-        if (flutterRoot != null) {
-            return flutterRoot
-        }
-        // Fallback to system flutter command
-        def flutterCmd = "which flutter"
-        def process = flutterCmd.execute()
-        process.waitFor()
-        if (process.exitValue() == 0) {
-            def flutterPath = process.text.trim()
-            def flutterFile = new File(flutterPath)
-            if (flutterFile.exists()) {
-                flutterPath = flutterFile.canonicalPath
-            }
-            return new File(flutterPath).parentFile.parent
-        }
-        throw new GradleException("flutter.sdk not set and flutter command not found")
+        assert flutterSdkPath != null, "flutter.sdk not set in local.properties"
+        return flutterSdkPath
     }()
 
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
