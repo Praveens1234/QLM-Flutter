@@ -1,14 +1,15 @@
+plugins {
+    id "com.android.application"
+    id "kotlin-android"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
 def localProperties = new Properties()
 def localPropertiesFile = rootProject.file("local.properties")
 if (localPropertiesFile.exists()) {
     localPropertiesFile.withReader("UTF-8") { reader ->
         localProperties.load(reader)
     }
-}
-
-def flutterRoot = localProperties.getProperty("flutter.sdk")
-if (flutterRoot == null) {
-    throw new GradleException("Flutter SDK not found. Define location with flutter.sdk in local.properties.")
 }
 
 def flutterVersionCode = localProperties.getProperty("flutter.versionCode")
@@ -19,9 +20,6 @@ def keystoreProperties = new Properties()
 if (keystorePropertiesFile.exists()) {
     keystorePropertiesFile.withInputStream { keystoreProperties.load(it) }
 }
-
-apply plugin: "com.android.application"
-apply plugin: "kotlin-android"
 
 android {
     namespace = "io.github.praveens1234.qlm"
@@ -39,7 +37,7 @@ android {
 
     defaultConfig {
         applicationId = "io.github.praveens1234.qlm"
-        minSdk = 24
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutterVersionCode != null ? flutterVersionCode.toInteger() : 1
         versionName = flutterVersionName != null ? flutterVersionName : "1.0.0"
@@ -74,8 +72,4 @@ android {
 
 flutter {
     source = "../.."
-}
-
-dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.9.10"
 }
