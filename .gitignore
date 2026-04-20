@@ -1,9 +1,9 @@
 # Flutter/Dart generated
 .dart_tool/
 .flutter-plugins*
-pubspec.lock
 android/local.properties
 android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+build/
 
 # OS files
 .DS_Store

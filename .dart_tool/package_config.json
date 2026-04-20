@@ -437,10 +437,10 @@
       "name": "qlm_mobile",
       "rootUri": "../",
       "packageUri": "lib/",
-      "languageVersion": "3.0"
+      "languageVersion": "3.5"
     }
   ],
-  "generated": "2026-04-20T06:34:52.602954Z",
+  "generated": "2026-04-20T06:47:49.409722Z",
   "generator": "pub",
   "generatorVersion": "3.5.4",
   "flutterRoot": "file:///tmp/flutter",
