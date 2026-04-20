@@ -61,9 +61,9 @@ jobs:
 
       - name: Configure local.properties
         run: |
-          FLUTTER_BIN=$(which flutter)
-          FLUTTER_SDK=$(dirname $(dirname $(readlink -f $FLUTTER_BIN)))
-          echo "flutter.sdk=$FLUTTER_SDK" > android/local.properties
+          echo "flutter.sdk=$FLUTTER_ROOT" > android/local.properties
+          echo "sdk.dir=$ANDROID_HOME" >> android/local.properties
+          cat android/local.properties
 
       - name: Accept Android licenses
         run: yes | flutter doctor --android-licenses || true
