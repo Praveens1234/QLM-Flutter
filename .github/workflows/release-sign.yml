@@ -39,31 +39,31 @@ jobs:
           cache: true
 
       - name: Get dependencies
-        run: cd mobile && flutter pub get
+        run: flutter pub get
 
       - name: Decode keystore
         run: |
-          echo "$SIGNING_KEY_BASE64" | base64 --decode > mobile/android/app/keystore.jks
+          echo "$SIGNING_KEY_BASE64" | base64 --decode > android/app/keystore.jks
         env:
           SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
 
       - name: Create key.properties
         run: |
-          cat > mobile/android/key.properties <<EOF
-          storePassword=${SIGNING_KEY_PASSWORD}
-          keyPassword=${SIGNING_KEY_PASSWORD}
-          keyAlias=${SIGNING_KEY_ALIAS}
-          storeFile=keystore.jks
-          EOF
+          cat > android/key.properties <<EOF
+storePassword=${SIGNING_KEY_PASSWORD}
+keyPassword=${SIGNING_KEY_PASSWORD}
+keyAlias=${SIGNING_KEY_ALIAS}
+storeFile=keystore.jks
+EOF
         env:
           SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
           SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
 
       - name: Build Signed App Bundle
-        run: cd mobile && flutter build appbundle --release
+        run: flutter build appbundle --release
 
       - name: Build Signed APK
-        run: cd mobile && flutter build apk --release
+        run: flutter build apk --release
 
       - name: Download unsigned APKs from prior job
         uses: actions/download-artifact@v4
