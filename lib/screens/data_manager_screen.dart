@@ -136,7 +136,7 @@ class _DataManagerScreenState extends State<DataManagerScreen> with SingleTicker
       ),
     );
 
-    if (confirm == true) {
+    if (confirm ?? false) {
       final success = await provider.deleteDataset(dataset.id);
       if (success && mounted) {
         AppToast.success(context, 'Dataset deleted');
@@ -245,8 +245,9 @@ class _DataManagerScreenState extends State<DataManagerScreen> with SingleTicker
             Consumer<DataProvider>(
               builder: (context, provider, _) => ElevatedButton(
                 onPressed: provider.uploading ? null : () {
+                  final navigator = Navigator.of(context);
                   _uploadFile().then((_) {
-                    if (!provider.uploading && provider.error == null) Navigator.pop(context);
+                    if (!provider.uploading && provider.error == null) navigator.pop();
                   });
                 },
                 child: provider.uploading
@@ -290,8 +291,9 @@ class _DataManagerScreenState extends State<DataManagerScreen> with SingleTicker
         Consumer<DataProvider>(
           builder: (context, provider, _) => ElevatedButton(
             onPressed: provider.uploading ? null : () {
+              final navigator = Navigator.of(context);
               _importUrl().then((_) {
-                 if (!provider.uploading && provider.error == null) Navigator.pop(context);
+                 if (!provider.uploading && provider.error == null) navigator.pop();
               });
             },
             child: provider.uploading

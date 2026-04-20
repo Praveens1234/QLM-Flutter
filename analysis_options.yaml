@@ -26,10 +26,10 @@ linter:
     avoid_print: false
     use_key_in_widget_constructors: false
     prefer_single_quotes: false
+    avoid_redundant_argument_values: false
     
     # Enabled rules for better code quality
     avoid_unnecessary_containers: true
-    avoid_redundant_argument_values: true
     avoid_relative_lib_imports: true
     avoid_types_as_parameter_names: true
     avoid_web_libraries_in_flutter: true

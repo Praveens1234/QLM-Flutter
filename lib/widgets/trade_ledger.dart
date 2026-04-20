@@ -186,7 +186,7 @@ class _TradeRow extends StatelessWidget {
     final exitPrice = (trade['exit_price'] as num?)?.toDouble() ?? 0;
     final duration = (trade['duration'] as num?)?.toDouble() ?? 0;
 
-    return Container(
+    return DecoratedBox(
       decoration: BoxDecoration(
         border: Border(
           bottom: BorderSide(

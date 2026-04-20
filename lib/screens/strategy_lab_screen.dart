@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 import '../providers/strategy_provider.dart';
 
 import '../widgets/code_editor.dart';
@@ -145,12 +146,12 @@ class _StrategyLabScreenState extends State<StrategyLabScreen> {
                 icon: const Icon(Icons.delete, color: Colors.red),
                 onPressed: () {
                   provider.deleteStrategy(strat.name);
-                  Navigator.pop(context);
+                  if (Navigator.canPop(context)) Navigator.pop(context);
                 },
               ),
               onTap: () {
                 provider.loadCode(strat.name, strat.latestVersion);
-                Navigator.pop(context);
+                if (Navigator.canPop(context)) Navigator.pop(context);
               },
             );
           },
@@ -235,26 +236,26 @@ class _StrategyLabScreenState extends State<StrategyLabScreen> {
 
   Future<void> _validate(StrategyProvider provider) async {
     // Show loading barrier
-    showDialog<void>(
+    await showDialog<void>(
       context: context,
       barrierDismissible: false,
       builder: (_) => const Center(child: CircularProgressIndicator()),
     );
 
-    final result = await provider.validate();
-    if (mounted) Navigator.pop(context); // Remove loading
+    if (!mounted) return;
 
+    final result = await provider.validate();
     if (!mounted) return;
 
     final isValid = result != null && result['valid'] == true;
-    
-    showDialog<void>(
+
+    await showDialog<void>(
       context: context,
-      builder: (context) {
+      builder: (ctx) {
         return AlertDialog(
           title: Row(
             children: [
-              Icon(isValid ? Icons.check_circle : Icons.error, 
+              Icon(isValid ? Icons.check_circle : Icons.error,
                 color: isValid ? Colors.green : Colors.red),
               const SizedBox(width: 8),
               Text(isValid ? 'Validation Passed' : 'Validation Failed'),
@@ -271,12 +272,12 @@ class _StrategyLabScreenState extends State<StrategyLabScreen> {
           ),
           actions: [
             TextButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => Navigator.of(ctx).pop(),
               child: const Text('Close'),
             )
           ],
         );
-      }
+      },
     );
   }
 

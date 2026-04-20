@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'dart:async';
 import '../providers/server_provider.dart';
 
 
@@ -65,7 +66,7 @@ class _ServerConnectScreenState extends State<ServerConnectScreen>
     final success = await server.connect(url);
 
     if (success && mounted) {
-      Navigator.of(context).pushReplacementNamed('/main');
+      unawaited(Navigator.of(context).pushReplacementNamed('/main'));
     }
   }
 

@@ -106,7 +106,7 @@ class _InspectorScreenState extends State<InspectorScreen> {
               }
               
               return GlassCard(
-                padding: const EdgeInsets.all(0),
+                padding: EdgeInsets.zero,
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
