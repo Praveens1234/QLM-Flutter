@@ -1,0 +1,134 @@
+name: CI/CD — Build & Release APK
+
+on:
+  push:
+    branches: [main]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  # ── Static Analysis & Tests ───────────────────────────────────────
+  quality:
+    name: Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Analyze code
+        run: flutter analyze --fatal-infos --fatal-warnings
+
+      - name: Run tests
+        run: flutter test --coverage --reporter compact
+
+  # ── Build Release APK (every push/PR to main) ────────────────────
+  build-apk:
+    name: Build Release APK
+    needs: quality
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java (JDK 17)
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '17'
+          cache: true
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Build Release APK
+        run: flutter build apk --release --split-per-abi
+
+      - name: Upload APK (arm64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: qlm-mobile-arm64-v8a
+          path: build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload APK (x86_64)
+        uses: actions/upload-artifact@v4
+        with:
+          name: qlm-mobile-x86_64
+          path: build/app/outputs/flutter-apk/app-x86_64-release.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      - name: Upload APK (universal)
+        uses: actions/upload-artifact@v4
+        with:
+          name: qlm-mobile-universal
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+          if-no-files-found: error
+
+  # ── Create GitHub Release (on tags only) ─────────────────────────
+  release:
+    name: Create Release
+    needs: build-apk
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download all APKs
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+          merge-multiple: false
+
+      - name: Extract APK versions
+        run: |
+          echo "TAG=${GITHUB_REF#refs/tags/v}" >> $GITHUB_ENV
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: QLM Mobile ${{ github.ref_name }}
+          body: |
+            ## QLM Mobile — ${{ github.ref_name }}
+
+            ### Downloads
+            | Architecture | APK |
+            |---|---|
+            | ARM64 (modern phones) | `qlm-mobile-arm64-v8a/app-arm64-v8a-release.apk` |
+            | x86_64 (emulators) | `qlm-mobile-x86_64/app-x86_64-release.apk` |
+            | Universal (all) | `qlm-mobile-universal/app-release.apk` |
+
+            ### What's Changed
+            ${{ github.event.head_commit.message }}
+          files: |
+            artifacts/qlm-mobile-arm64-v8a/app-arm64-v8a-release.apk
+            artifacts/qlm-mobile-x86_64/app-x86_64-release.apk
+            artifacts/qlm-mobile-universal/app-release.apk
+          draft: false
+          prerelease: false

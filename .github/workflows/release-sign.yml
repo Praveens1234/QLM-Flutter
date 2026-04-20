@@ -1,0 +1,95 @@
+# Signed Build — runs when tag starts with 'v' AND keystore secret exists
+# Uploads a signed App Bundle (AAB) to GitHub Releases alongside APKs.
+#
+# REQUIRED SECRETS (Settings → Secrets → Actions):
+#   SIGNING_KEY_BASE64   — base64-encoded keystore.jks
+#   SIGNING_KEY_PASSWORD  — keystore password
+#   SIGNING_KEY_ALIAS     — key alias
+
+name: Release — Signed AAB
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  signed-build:
+    name: Build Signed AAB
+    runs-on: ubuntu-latest
+    if: ${{ secrets.SIGNING_KEY_BASE64 != '' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: zulu
+          java-version: '17'
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.24.x'
+          channel: stable
+          cache: true
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Decode keystore
+        run: |
+          echo "$SIGNING_KEY_BASE64" | base64 --decode > android/app/keystore.jks
+        env:
+          SIGNING_KEY_BASE64: ${{ secrets.SIGNING_KEY_BASE64 }}
+
+      - name: Create key.properties
+        run: |
+          cat > android/key.properties <<EOF
+          storePassword=${SIGNING_KEY_PASSWORD}
+          keyPassword=${SIGNING_KEY_PASSWORD}
+          keyAlias=${SIGNING_KEY_ALIAS}
+          storeFile=keystore.jks
+          EOF
+        env:
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+
+      - name: Build Signed App Bundle
+        run: flutter build appbundle --release
+
+      - name: Build Signed APK
+        run: flutter build apk --release
+
+      - name: Download unsigned APKs from prior job
+        uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          pattern: qlm-mobile-*
+          path: artifacts
+          merge-multiple: false
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: QLM Mobile ${{ github.ref_name }}
+          body: |
+            ## QLM Mobile — ${{ github.ref_name }} (Signed Release)
+
+            | Type | File |
+            |---|---|
+            | App Bundle (Play Store) | `app-release.aab` |
+            | APK (direct install) | `app-release.apk` |
+
+            ### Install
+            Download `app-release.apk` and install directly on your device.
+          files: |
+            build/app/outputs/bundle/release/app-release.aab
+            build/app/outputs/flutter-apk/app-release.apk
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-rc') }}
