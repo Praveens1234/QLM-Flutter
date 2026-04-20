@@ -15,12 +15,11 @@ pluginManagement {
             return flutterRoot
         }
         // Fallback to system flutter command
-        def flutterCmd = OS.isFamilyWindows() ? "where flutter" : "which flutter"
+        def flutterCmd = "which flutter"
         def process = flutterCmd.execute()
         process.waitFor()
         if (process.exitValue() == 0) {
             def flutterPath = process.text.trim()
-            // Follow symlinks
             def flutterFile = new File(flutterPath)
             if (flutterFile.exists()) {
                 flutterPath = flutterFile.canonicalPath
