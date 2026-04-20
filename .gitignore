@@ -1,0 +1,16 @@
+# Flutter/Dart generated
+.dart_tool/
+.flutter-plugins*
+pubspec.lock
+android/local.properties
+android/app/src/main/java/io/flutter/plugins/GeneratedPluginRegistrant.java
+
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+
+# IDE
+.vscode/
+.idea/
+*.iml
