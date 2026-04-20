@@ -71,6 +71,10 @@ jobs:
       - name: Get dependencies
         run: flutter pub get
 
+      - name: Install Android NDK
+        run: |
+          ${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager --install "ndk;27.0.12077973" --sdk_root=${ANDROID_SDK_ROOT}
+
       - name: Build Release APK
         run: flutter build apk --release --split-per-abi
 
